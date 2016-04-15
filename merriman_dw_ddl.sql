@@ -67,8 +67,8 @@ create table dimExperiment (
 );
 insert into dimExperiment
     select (@Nexp := @Nexp + 1),
-            myControls.Diuretic,
             myCases.All,
+            myControls.Diuretic,
             (@CurExp := @CurExp + 1),
             1
     from (
