@@ -59,11 +59,9 @@ create table dimExperiment (
     experimentID tinyint not null auto_increment,
     caseCondition varchar(20) not null,
     controlCondition varchar(20) not null,
-    currentExperimentID int,
     datasetID int not null,
     primary key (experimentID),
-    foreign key (datasetID) references dimSourceDataset(datasetID),
-    constraint uniq_Experiment unique (datasetID, currentExperimentID)
+    foreign key (datasetID) references dimSourceDataset(datasetID)
 );
 insert into dimExperiment
     select (@Nexp := @Nexp + 1),
