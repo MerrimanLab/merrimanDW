@@ -61,7 +61,7 @@ create table dimExperiment (
     Description TEXT,
     Covariates TEXT not null,
     ParameterType int not null,
-    DataLoadDate DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    DataLoadDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     primary key (experimentID),
     foreign key (datasetID) references dimSourceDataset(datasetID),
     foreign key (caseCondition) references dimCondition(conditionID),
