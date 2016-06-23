@@ -129,16 +129,57 @@ for (pop in pops$pop[c(1:26,28)]){
 
 #### tajimas d - 1KG pops - axiom_omni info 0.3 ####
 
-exID <- NA
+exID <- 3
 dimStat <- dbReadTable(selection_db, name = 'dimStat')
 td <- which(dimStat$statName == "TajimasD")
 nsite <- which(dimStat$statName == 'NumSites_TajimasD')
-
-tajd_path <- "/run/user/1000/gvfs/smb-share:server=biocldap,share=scratch/merrimanlab/murray/working_dir/Phase3_selection_results/TajimaD/"
+tajd_path <- paste0(scratch_dir,"/Phase3_selection_results/TajimaD/")
 for (pop in pops$pop[1:26]){
   for(chr in 1:22){
     print(paste0(pop,chr))
-    tmp <- read.table(paste0(tajd_path,'/',pop,'/results/',pop,chr,".taj_d"), header=TRUE, stringsAsFactors = FALSE, sep="\t")
+    tmp <- read.table(paste0(tajd_path,'/',pop,chr,".taj_d"), header=TRUE, stringsAsFactors = FALSE, sep="\t")
+    tmp$popID <- as.numeric(which(pops$pop==pop))
+    tmp
+    #dimVar
+    tmp$chrom <- chr
+    tmp$chrom_start <- tmp$BIN_START
+    w <- tmp$BIN_START[3] - tmp$BIN_START[2]
+    tmp$chrom_end <- tmp$BIN_START +w -1
+    tmp$slide = w
+    var <- dbReadTable(selection_db, name = 'dimPos')
+    newVar <- merge(var, tmp, by = c('chrom','chrom_start','chrom_end', 'slide'), all.y = TRUE)
+    newVar$slide <- newVar$chrom_end - newVar$chrom_start +1
+    newVar <- newVar[is.na(newVar$posID),]
+    if(nrow(newVar) > 0){
+      dbWriteTable(selection_db, name = 'dimPos', newVar[, c('chrom_start','chrom_end','chrom', 'slide')], append = TRUE, row.names=FALSE)
+    }
+    #update posID
+    updatedVar <- dbReadTable(selection_db, name = 'dimPos')
+    newVar <- merge(updatedVar, tmp, by = c('chrom','chrom_start','chrom_end', 'slide'), all.y = TRUE)
+    # insert tajimas d
+    newVar$experimentID <- exID
+    newVar$statValue <- newVar$TajimaD
+    newVar$statID <- td
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    # insert number of sites
+    newVar$statValue <- newVar$N_SNPS
+    newVar$statID <- nsite
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+  }
+}
+
+#### tajimas d - axiom_omni info 0.3 ####
+
+exID <- 3
+dimStat <- dbReadTable(selection_db, name = 'dimStat')
+td <- which(dimStat$statName == "TajimasD")
+nsite <- which(dimStat$statName == 'NumSites_TajimasD')
+tajd_path <- paste0(scratch_dir,"/Phase3_selection_results/TajimaD/Info0.3")
+for (pop in pops$pop[27:28]){
+  for(chr in 1:22){
+    print(paste0(pop,chr))
+    tmp <- read.table(paste0(tajd_path,'/',pop,chr,".taj_d"), header=TRUE, stringsAsFactors = FALSE, sep="\t")
     tmp$popID <- as.numeric(which(pops$pop==pop))
     tmp
     #dimVar
@@ -171,17 +212,59 @@ for (pop in pops$pop[1:26]){
 }
 
 
-#### tajimas d - axiom_omni info 0.3 ####
+#### tajimas d - 1KG pops - axiom_omni info 0.8 ####
 
-exID <- NA
+exID <- 4
 dimStat <- dbReadTable(selection_db, name = 'dimStat')
 td <- which(dimStat$statName == "TajimasD")
 nsite <- which(dimStat$statName == 'NumSites_TajimasD')
-tajd_path <- paste0(scratch_dir,"/nesi_retrieved/Unimputed/Omni/TD/")
-for (pop in pops$pop[27]){
+tajd_path <- paste0(scratch_dir,"/Phase3_selection_results/TajimaD/")
+for (pop in pops$pop[1:26]){
   for(chr in 1:22){
     print(paste0(pop,chr))
-    tmp <- read.table(paste0(tajd_path,'/',pop,'/results/',pop,chr,".taj_d"), header=TRUE, stringsAsFactors = FALSE, sep="\t")
+    tmp <- read.table(paste0(tajd_path,'/',pop,chr,".taj_d"), header=TRUE, stringsAsFactors = FALSE, sep="\t")
+    tmp$popID <- as.numeric(which(pops$pop==pop))
+    tmp
+    #dimVar
+    tmp$chrom <- chr
+    tmp$chrom_start <- tmp$BIN_START
+    w <- tmp$BIN_START[3] - tmp$BIN_START[2]
+    tmp$chrom_end <- tmp$BIN_START +w -1
+    tmp$slide = w
+    var <- dbReadTable(selection_db, name = 'dimPos')
+    newVar <- merge(var, tmp, by = c('chrom','chrom_start','chrom_end', 'slide'), all.y = TRUE)
+    newVar$slide <- newVar$chrom_end - newVar$chrom_start +1
+    newVar <- newVar[is.na(newVar$posID),]
+    if(nrow(newVar) > 0){
+      dbWriteTable(selection_db, name = 'dimPos', newVar[, c('chrom_start','chrom_end','chrom', 'slide')], append = TRUE, row.names=FALSE)
+    }
+    #update posID
+    updatedVar <- dbReadTable(selection_db, name = 'dimPos')
+    newVar <- merge(updatedVar, tmp, by = c('chrom','chrom_start','chrom_end', 'slide'), all.y = TRUE)
+    # insert tajimas d
+    newVar$experimentID <- exID
+    newVar$statValue <- newVar$TajimaD
+    newVar$statID <- td
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    # insert number of sites
+    newVar$statValue <- newVar$N_SNPS
+    newVar$statID <- nsite
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+  }
+}
+
+#### tajimas d - axiom_omni info 0.8 ####
+
+exID <- 4
+dimStat <- dbReadTable(selection_db, name = 'dimStat')
+td <- which(dimStat$statName == "TajimasD")
+nsite <- which(dimStat$statName == 'NumSites_TajimasD')
+tajd_path <- paste0(scratch_dir,"/Phase3_selection_results/TajimaD/Info0.8")
+for (pop in pops$pop[27:28]){
+  for(chr in 1:22){
+    print(paste0(pop,chr))
+    tmp <- read.table(paste0(tajd_path,'/',pop,chr,".taj_d"), header=TRUE, stringsAsFactors = FALSE, sep="\t")
     tmp$popID <- as.numeric(which(pops$pop==pop))
     tmp
     #dimVar
@@ -238,7 +321,7 @@ for (pop in pops$pop[c(1:27)]){
     
     var <- dbReadTable(selection_db, name = 'dimPos')
     newVar <- merge(var, tmp, by = c('chrom','chrom_start','chrom_end', 'slide'), all.y = TRUE)
-    newVar$slide <- newVar$chrom_end - newVar$chrom_start +1
+    newVar$slide <- w
     dbWriteTable(selection_db, name = 'dimPos', newVar[, c('chrom_start','chrom_end','chrom', 'slide')], append = TRUE, row.names=FALSE)
     #update posID
     updatedVar <- dbReadTable(selection_db, name = 'dimPos')
@@ -299,7 +382,7 @@ pi <- which(dimStat$statName == "Pi")
 fuli_d <-which(dimStat$statName == "FuLiD")
 fuli_f <-which(dimStat$statName == "FuLiF")
 faywuh <- which(dimStat$statName == "FayWuH")
-for (pop in pops$pop[c(1:27)]){
+for (pop in pops$pop[c(1:26,28)]){
   for(chr in 1:22){
     print(paste0(pop,chr))
     tmp <- read.table(paste0(faw_path,'/',pop,'/results/',pop,chr,".faw"), header=FALSE, stringsAsFactors = FALSE, skip =5)
@@ -311,7 +394,7 @@ for (pop in pops$pop[c(1:27)]){
     
     var <- dbReadTable(selection_db, name = 'dimPos')
     newVar <- merge(var, tmp, by = c('chrom','chrom_start','chrom_end', 'slide'), all.y = TRUE)
-    newVar$slide <- newVar$chrom_end - newVar$chrom_start
+    newVar$slide <- w
     dbWriteTable(selection_db, name = 'dimPos', newVar[, c('chrom_start','chrom_end','chrom', 'slide')], append = TRUE, row.names=FALSE)
     #update posID
     updatedVar <- dbReadTable(selection_db, name = 'dimPos')
@@ -359,6 +442,298 @@ for (pop in pops$pop[c(1:27)]){
   }
 }
 
+
+#### Fay Wu's H - 1KG axiom_omni info 0.3 ####
+exID <- 3
+faw_path <- paste0(scratch_dir,"/Phase3_selection_results/FayWuH/")
+dimStat <- dbReadTable(selection_db, name = 'dimStat')
+s <- which(dimStat$statName == "s")
+nsite <- which(dimStat$statName == 'NumSites_FayWuH')
+eta <- which(dimStat$statName == "Eta")
+eta_e <- which(dimStat$statName == "Eta_e")
+pi <- which(dimStat$statName == "Pi")
+fuli_d <-which(dimStat$statName == "FuLiD")
+fuli_f <-which(dimStat$statName == "FuLiF")
+faywuh <- which(dimStat$statName == "FayWuH")
+for (pop in pops$pop[c(1:26)]){
+  for(chr in 1:22){
+    print(paste0(pop,chr))
+    tmp <- read.table(paste0(faw_path,'/',pop,chr,".faw"), header=FALSE, stringsAsFactors = FALSE, skip =5)
+    names(tmp)=c("RefStart","Refend","RefMid","chrom_start","chrom_end","Midpoint","num_sites","missing","s","eta","eta_e","pi","fuli_d","fuli_f","faywu_h")
+    tmp$popID <- which(pops$pop==pop)
+    tmp$chrom <- chr
+    w <- tmp$chrom_end[3] - tmp$chrom_start[3] +1
+    tmp$slide = w
+    
+    var <- dbReadTable(selection_db, name = 'dimPos')
+    newVar <- merge(var, tmp, by = c('chrom','chrom_start','chrom_end', 'slide'), all.y = TRUE)
+    newVar$slide <- w
+    dbWriteTable(selection_db, name = 'dimPos', newVar[, c('chrom_start','chrom_end','chrom', 'slide')], append = TRUE, row.names=FALSE)
+    #update posID
+    updatedVar <- dbReadTable(selection_db, name = 'dimPos')
+    newVar <- merge(updatedVar, tmp, by = c('chrom','chrom_start','chrom_end', 'slide'), all.y = TRUE)
+    
+    # insert S
+    newVar$experimentID <- exID
+    newVar$statValue <- newVar$s
+    newVar$statID <- s
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    # insert number of sites
+    newVar$statValue <- newVar$num_sites
+    newVar$statID <- nsite
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert eta
+    newVar$statValue <- newVar$num_sites
+    newVar$statID <- eta
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert eta_e
+    newVar$statValue <- newVar$eta_e
+    newVar$statID <- eta_e
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert pi
+    newVar$statValue <- newVar$pi
+    newVar$statID <- pi
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert fu li's d
+    newVar$statValue <- newVar$fuli_d
+    newVar$statID <- fuli_d
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert fu li's f
+    newVar$statValue <- newVar$fuli_f
+    newVar$statID <- fuli_f
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert fay wu's h
+    newVar$statValue <- newVar$faywu_h
+    newVar$statID <- faywuh
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+  }
+}
+
+#### Fay Wu's H - axiom_omni info 0.3 ####
+exID <- 3
+faw_path <- paste0(scratch_dir,"/Phase3_selection_results/FayWuH/Info0.3/")
+dimStat <- dbReadTable(selection_db, name = 'dimStat')
+s <- which(dimStat$statName == "s")
+nsite <- which(dimStat$statName == 'NumSites_FayWuH')
+eta <- which(dimStat$statName == "Eta")
+eta_e <- which(dimStat$statName == "Eta_e")
+pi <- which(dimStat$statName == "Pi")
+fuli_d <-which(dimStat$statName == "FuLiD")
+fuli_f <-which(dimStat$statName == "FuLiF")
+faywuh <- which(dimStat$statName == "FayWuH")
+for (pop in pops$pop[c(27,28)]){
+  for(chr in 1:22){
+    print(paste0(pop,chr))
+    tmp <- read.table(paste0(faw_path,'/',pop,chr,".faw"), header=FALSE, stringsAsFactors = FALSE, skip =5)
+    names(tmp)=c("RefStart","Refend","RefMid","chrom_start","chrom_end","Midpoint","num_sites","missing","s","eta","eta_e","pi","fuli_d","fuli_f","faywu_h")
+    tmp$popID <- which(pops$pop==pop)
+    tmp$chrom <- chr
+    w <- tmp$chrom_end[3] - tmp$chrom_start[3] +1
+    tmp$slide = w
+    
+    var <- dbReadTable(selection_db, name = 'dimPos')
+    newVar <- merge(var, tmp, by = c('chrom','chrom_start','chrom_end', 'slide'), all.y = TRUE)
+    newVar$slide <- w
+    dbWriteTable(selection_db, name = 'dimPos', newVar[, c('chrom_start','chrom_end','chrom', 'slide')], append = TRUE, row.names=FALSE)
+    #update posID
+    updatedVar <- dbReadTable(selection_db, name = 'dimPos')
+    newVar <- merge(updatedVar, tmp, by = c('chrom','chrom_start','chrom_end', 'slide'), all.y = TRUE)
+    
+    # insert S
+    newVar$experimentID <- exID
+    newVar$statValue <- newVar$s
+    newVar$statID <- s
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    # insert number of sites
+    newVar$statValue <- newVar$num_sites
+    newVar$statID <- nsite
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert eta
+    newVar$statValue <- newVar$num_sites
+    newVar$statID <- eta
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert eta_e
+    newVar$statValue <- newVar$eta_e
+    newVar$statID <- eta_e
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert pi
+    newVar$statValue <- newVar$pi
+    newVar$statID <- pi
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert fu li's d
+    newVar$statValue <- newVar$fuli_d
+    newVar$statID <- fuli_d
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert fu li's f
+    newVar$statValue <- newVar$fuli_f
+    newVar$statID <- fuli_f
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert fay wu's h
+    newVar$statValue <- newVar$faywu_h
+    newVar$statID <- faywuh
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+  }
+}
+
+#### Fay Wu's H - 1KG axiom_omni info 0.8 ####
+exID <- 4
+faw_path <- paste0(scratch_dir,"/Phase3_selection_results/FayWuH/")
+dimStat <- dbReadTable(selection_db, name = 'dimStat')
+s <- which(dimStat$statName == "s")
+nsite <- which(dimStat$statName == 'NumSites_FayWuH')
+eta <- which(dimStat$statName == "Eta")
+eta_e <- which(dimStat$statName == "Eta_e")
+pi <- which(dimStat$statName == "Pi")
+fuli_d <-which(dimStat$statName == "FuLiD")
+fuli_f <-which(dimStat$statName == "FuLiF")
+faywuh <- which(dimStat$statName == "FayWuH")
+for (pop in pops$pop[c(1:26)]){
+  for(chr in 1:22){
+    print(paste0(pop,chr))
+    tmp <- read.table(paste0(faw_path,'/',pop,chr,".faw"), header=FALSE, stringsAsFactors = FALSE, skip =5)
+    names(tmp)=c("RefStart","Refend","RefMid","chrom_start","chrom_end","Midpoint","num_sites","missing","s","eta","eta_e","pi","fuli_d","fuli_f","faywu_h")
+    tmp$popID <- which(pops$pop==pop)
+    tmp$chrom <- chr
+    w <- tmp$chrom_end[3] - tmp$chrom_start[3] +1
+    tmp$slide = w
+    
+    var <- dbReadTable(selection_db, name = 'dimPos')
+    newVar <- merge(var, tmp, by = c('chrom','chrom_start','chrom_end', 'slide'), all.y = TRUE)
+    newVar$slide <- w
+    dbWriteTable(selection_db, name = 'dimPos', newVar[, c('chrom_start','chrom_end','chrom', 'slide')], append = TRUE, row.names=FALSE)
+    #update posID
+    updatedVar <- dbReadTable(selection_db, name = 'dimPos')
+    newVar <- merge(updatedVar, tmp, by = c('chrom','chrom_start','chrom_end', 'slide'), all.y = TRUE)
+    
+    # insert S
+    newVar$experimentID <- exID
+    newVar$statValue <- newVar$s
+    newVar$statID <- s
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    # insert number of sites
+    newVar$statValue <- newVar$num_sites
+    newVar$statID <- nsite
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert eta
+    newVar$statValue <- newVar$num_sites
+    newVar$statID <- eta
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert eta_e
+    newVar$statValue <- newVar$eta_e
+    newVar$statID <- eta_e
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert pi
+    newVar$statValue <- newVar$pi
+    newVar$statID <- pi
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert fu li's d
+    newVar$statValue <- newVar$fuli_d
+    newVar$statID <- fuli_d
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert fu li's f
+    newVar$statValue <- newVar$fuli_f
+    newVar$statID <- fuli_f
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert fay wu's h
+    newVar$statValue <- newVar$faywu_h
+    newVar$statID <- faywuh
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+  }
+}
+
+#### Fay Wu's H - axiom_omni info 0.3 ####
+exID <- 4
+faw_path <- paste0(scratch_dir,"/Phase3_selection_results/FayWuH/Info0.8/")
+dimStat <- dbReadTable(selection_db, name = 'dimStat')
+s <- which(dimStat$statName == "s")
+nsite <- which(dimStat$statName == 'NumSites_FayWuH')
+eta <- which(dimStat$statName == "Eta")
+eta_e <- which(dimStat$statName == "Eta_e")
+pi <- which(dimStat$statName == "Pi")
+fuli_d <-which(dimStat$statName == "FuLiD")
+fuli_f <-which(dimStat$statName == "FuLiF")
+faywuh <- which(dimStat$statName == "FayWuH")
+for (pop in pops$pop[c(27,28)]){
+  for(chr in 1:22){
+    print(paste0(pop,chr))
+    tmp <- read.table(paste0(faw_path,'/',pop,chr,".faw"), header=FALSE, stringsAsFactors = FALSE, skip =5)
+    names(tmp)=c("RefStart","Refend","RefMid","chrom_start","chrom_end","Midpoint","num_sites","missing","s","eta","eta_e","pi","fuli_d","fuli_f","faywu_h")
+    tmp$popID <- which(pops$pop==pop)
+    tmp$chrom <- chr
+    w <- tmp$chrom_end[3] - tmp$chrom_start[3] +1
+    tmp$slide = w
+    
+    var <- dbReadTable(selection_db, name = 'dimPos')
+    newVar <- merge(var, tmp, by = c('chrom','chrom_start','chrom_end', 'slide'), all.y = TRUE)
+    newVar$slide <- w
+    dbWriteTable(selection_db, name = 'dimPos', newVar[, c('chrom_start','chrom_end','chrom', 'slide')], append = TRUE, row.names=FALSE)
+    #update posID
+    updatedVar <- dbReadTable(selection_db, name = 'dimPos')
+    newVar <- merge(updatedVar, tmp, by = c('chrom','chrom_start','chrom_end', 'slide'), all.y = TRUE)
+    
+    # insert S
+    newVar$experimentID <- exID
+    newVar$statValue <- newVar$s
+    newVar$statID <- s
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    # insert number of sites
+    newVar$statValue <- newVar$num_sites
+    newVar$statID <- nsite
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert eta
+    newVar$statValue <- newVar$num_sites
+    newVar$statID <- eta
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert eta_e
+    newVar$statValue <- newVar$eta_e
+    newVar$statID <- eta_e
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert pi
+    newVar$statValue <- newVar$pi
+    newVar$statID <- pi
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert fu li's d
+    newVar$statValue <- newVar$fuli_d
+    newVar$statID <- fuli_d
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert fu li's f
+    newVar$statValue <- newVar$fuli_f
+    newVar$statID <- fuli_f
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+    
+    # insert fay wu's h
+    newVar$statValue <- newVar$faywu_h
+    newVar$statID <- faywuh
+    dbWriteTable(selection_db, name = 'intraSel', newVar[,c('popID', 'posID','statValue','statID','experimentID' )], row.names=FALSE, append = TRUE)
+  }
+}
+
+
+
+#### rest of script ####
 
 # daf
 # DAF
