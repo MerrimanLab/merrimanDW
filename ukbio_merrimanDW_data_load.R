@@ -2,7 +2,7 @@ library(RMySQL)
 library(data.table)
 library(dplyr)
 drv = dbDriver("MySQL")
-db = dbConnect(drv, default.file = '~/.my.cnf', dbname="merrimanDW_test")
+db = dbConnect(drv, default.file = '~/.my.cnf', dbname="merrimanDW")
 
 dbGetQuery(db,'show tables;')
 
@@ -97,7 +97,7 @@ factGWAS_dimVariant <- function(gc,cc,ex){
   for( chr in 1:22){
     message(chr)
     message('read assoc')
-    results <- fread(paste0(scratch_dir,'GWAS_all_controls/',control_switch(cc),'/',case_switch(gc),'/',adj,'/',control_switch(cc),case_switch(gc),'_chr',chr,'.assoc.logistic'), header=TRUE)
+    results <- fread(paste0(scratch_dir,'GWAS_all_controls/',control_switch(cc),'/',case_switch(gc),'/',adj,'/',control_switch(cc),case_switch(gc),'_chr',chr,'.assoc.logistic.tab'), header=TRUE, colClasses = c('integer','character','integer','character','character','integer',rep('numeric',6)))
     colnames(results)
     results$row <- as.numeric(rownames(results))
     results$obs <- results$NMISS
@@ -108,7 +108,7 @@ factGWAS_dimVariant <- function(gc,cc,ex){
     
     # row number ~~should~~ (observed but not proved) match for joining freq with the snp per row version of hwe
     message('read freq')
-    freq <- fread(paste0(scratch_dir,'GWAS_all_controls/',control_switch(cc),'/',case_switch(gc),'/',adj,'/',control_switch(cc),case_switch(gc),'_chr',chr,'.frq.cc'), header=TRUE)
+    freq <- fread(paste0(scratch_dir,'GWAS_all_controls/',control_switch(cc),'/',case_switch(gc),'/',adj,'/',control_switch(cc),case_switch(gc),'_chr',chr,'.frq.cc.tab'), header=TRUE)
     freq$row <- as.numeric(rownames(freq))
     freq$obs <- apply(freq[,.(NCHROBS_A,NCHROBS_U)],1,sum) / 2
     setkey(freq, row)
@@ -117,7 +117,7 @@ factGWAS_dimVariant <- function(gc,cc,ex){
     
     #use row to separate and rejoin hwe back together as single row per snp
     message('read hwe')
-    hwe <- fread(paste0(scratch_dir,'GWAS_all_controls/',control_switch(cc),'/',case_switch(gc),'/',adj,'/',control_switch(cc),case_switch(gc),'_chr',chr,'.hwe'), header=TRUE)
+    hwe <- fread(paste0(scratch_dir,'GWAS_all_controls/',control_switch(cc),'/',case_switch(gc),'/',adj,'/',control_switch(cc),case_switch(gc),'_chr',chr,'.hwe.tab'), header=TRUE)
     hwe$obs_hwe <- unlist(lapply(lapply(strsplit(hwe$GENO, '/'), as.numeric),sum))
     hwe$row1 <- as.numeric(rownames(hwe))
     
@@ -222,6 +222,7 @@ for(gc in g_cond){
     #dimPerson
     fam_file <- fam_file_load(gc = gc, cc = cc)
     for(ex in expID$experimentID){
+      message(paste(cc,gc,ex))
       fam_file$experimentID <-  ex
       dbWriteTable(db, name = 'dimPeople', fam_file[, .(fid,iid, experimentID, CaseControl)], append=TRUE,row.names = FALSE)
       #factGwas and dimVariant

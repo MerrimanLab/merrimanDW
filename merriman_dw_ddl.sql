@@ -100,14 +100,16 @@ create table factGWAS (
     MAF_ALL float,
     hwe_geno_U varchar(32),
     hwe_geno_A varchar(32),
+    hwe_geno_ALL varchar(32),
     hwe_P_U float,
     hwe_P_A float,
-    hwe_all float,
+    hwe_P_ALL float,
     majorAllele tinyint not null,
     infoscore float,
     primary key (experimentID, variantID),
     foreign key (experimentID) references dimExperiment(experimentID),
     foreign key (variantID) references dimVariant(variantID)
 );
+
 
 
